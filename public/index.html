@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Sources API Demo</title>
+
+  <!-- Bootstrap -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  <!-- Optional theme -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+  <!-- PaymentFont -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paymentfont/1.2.4/css/paymentfont.min.css">
+
+  <!-- Local css -->
+  <link rel="stylesheet" href="stylesheets/style.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="page-header col-sm-12">
+        <h1>Sources API Demo</h1>
+
+        <p class="lead">
+          This page demonstrates a <a href="https://stripe.com/docs/sources/best-practices" target="_blank">best practise integration</a> for multiple payment methods. See <a href="https://stripe.com/docs/testing#sources" target="_blank">testing docs</a> for different testing inputs.
+        </p>
+      </div>
+
+        <div class="spinner">
+          <div class="bounce1"></div>
+          <div class="bounce2"></div>
+          <div class="bounce3"></div>
+        </div>
+
+      <p id="result" class="bg-success"></p>
+      <p id="error" class="bg-danger"></p>
+    </div>
+
+    <div class="row top-buffer">
+      <div class="form-group">
+        <label for="owner_name" class="col-xs-4 col-sm-2">Owner Name</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="owner_name" value="Jenny Rosen">
+        </div>
+        <label for="address_line1" class="col-xs-4 col-sm-2">Address</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="address_line1" value="Nollendorfstraße 27">
+        </div>
+        <label for="postal_code" class="col-xs-4 col-sm-2">Postal Code</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="postal_code" value="10777">
+        </div>
+        <label for="city" class="col-xs-4 col-sm-2">City</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="city" value="Berlin">
+        </div>
+        <label for="email" class="col-xs-4 col-sm-2">Email</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="email" value="jenny.rosen@example.com">
+        </div>
+        <label for="phone" class="col-xs-4 col-sm-2">Phone</label>
+        <div class="col-xs-8 col-sm-4">
+          <input type="text" class="form-control" id="phone" value="4152165700">
+        </div>
+      </div>
+    </div>
+
+    <div class="row top-buffer">
+      <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingCard">
+            <h4 class="panel-title">
+              <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseCard" aria-expanded="false" aria-controls="collapseCard">
+                <span class="pf pf-card"></span> Pay with Card
+              </a>
+            </h4>
+          </div>
+          <div id="collapseCard" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingCard">
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="card-element" class="col-xs-12 col-sm-3">Card details</label>
+                <div class="col-xs-12 col-sm-9">
+                  <div id="card-element" class="field"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="card" class="paymentButton btn btn-default">
+                    Submit
+                  </button>
+                  <button class="btn btn-default" id="checkoutButton">Stripe Checkout</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingSepa">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSepa" aria-expanded="false" aria-controls="collapseSepa">
+                <span class="pf pf-sepa"></span> Pay with IBAN Direct Debit
+              </a>
+            </h4>
+          </div>
+          <div id="collapseSepa" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSepa">
+            <div class="panel-body">
+              <form class="form-horizontal" id="sepa-form">
+                <div class="form-group">
+                  <label for="iban" class="col-xs-4 col-sm-2">IBAN</label>
+                  <div class="col-xs-8 col-sm-10">
+                    <input type="text" class="form-control" id="IBAN" value="DE89370400440532013000">
+                  </div>
+                </div>
+                <div class="col-sm-offset-2 col-sm-10">
+                  <p class="bg-info">
+                    By providing your IBAN and confirming this payment, you are authorizing Test GmbH and Stripe, our payment service provider, to send instructions to your bank to debit your account and your bank to debit your account in accordance with those instructions. You are entitled to a refund from your bank under the terms and conditions of your agreement with your bank. A refund must be claimed within 8 weeks starting from the date on which your account was debited.
+                  </p>
+                </div>
+                <div class="form-group">
+                  <div class="col-sm-offset-2 col-sm-10">
+                    <button id="sepa_debit" class="paymentButton btn btn-default">
+                      Confirm Debit
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingSofort">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseSofort" aria-expanded="false" aria-controls="collapseSofort">
+                <span class="pf pf-sofort"></span> Pay with SOFORT
+              </a>
+            </h4>
+          </div>
+          <div id="collapseSofort" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSofort">
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="sofort_country" class="col-xs-6 col-sm-6">Bank account country</label>
+                <div class="col-xs-6 col-sm-6">
+                  <select class="form-control" id="sofort_country">
+                    <option value="DE" selected>Germany</option>
+                    <option value="AT">Austria</option>
+                    <option value="NL">Netherlands</option>
+                    <option value="BE">Belgium</option>
+                    <option value="ES">Spain</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="sofort" class="paymentButton btn btn-default">
+                    Redirect to SOFORT
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingGiropay">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseGiropay" aria-expanded="false" aria-controls="collapseGiropay">
+                <span class="pf pf-giropay"></span> Pay with Giropay
+              </a>
+            </h4>
+          </div>
+          <div id="collapseGiropay" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingGiropay">
+            <div class="panel-body">
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="giropay" class="paymentButton btn btn-default">
+                    Redirect to Giropay
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingIdeal">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseIdeal" aria-expanded="false" aria-controls="collapseIdeal">
+                <span class="pf pf-ideal"></span> Pay with iDEAL
+              </a>
+            </h4>
+          </div>
+          <div id="collapseIdeal" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingIdeal">
+            <div class="panel-body">
+              <div class="form-group">
+                <label for="ideal_bank" class="col-xs-6 col-sm-6">Select your bank</label>
+                <div class="col-xs-6 col-sm-6">
+                  <select class="form-control" id="ideal_bank">
+                    <option value="">-</option>
+                    <option value="abn_amro">ABN AMRO</option>
+                    <option value="bunq">bunq</option>
+                    <option value="asn_bank">ASN Bank</option>
+                    <option value="ing">ING Bank</option>
+                    <option value="knab">Knab</option>
+                    <option value="rabobank">Rabobank</option>
+                    <option value="regiobank">RegioBank</option>
+                    <option value="sns_bank">SNS Bank</option>
+                    <option value="triodos_bank">Triodos Bank</option>
+                    <option value="van_lanschot">Van Lanschot</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="ideal" class="paymentButton btn btn-default">
+                    Redirect to iDEAL
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingBancontact">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBancontact" aria-expanded="false" aria-controls="collapseBancontact">
+                <span class="pf pf-bancontact-mister-cash"></span> Pay with Bancontact
+              </a>
+            </h4>
+          </div>
+          <div id="collapseBancontact" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBancontact">
+            <div class="panel-body">
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="bancontact" class="paymentButton btn btn-default">
+                    Redirect to Bancontact
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingAlipay">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseAlipay" aria-expanded="false" aria-controls="collapseAlipay">
+                <span class="pf pf-alipay"></span> Pay with Alipay
+              </a>
+            </h4>
+          </div>
+          <div id="collapseAlipay" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingAlipay">
+            <div class="panel-body">
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="alipay" class="paymentButton btn btn-default">
+                    Redirect to Alipay
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingBitcoin">
+            <h4 class="panel-title">
+              <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseBitcoin" aria-expanded="false" aria-controls="collapseBitcoin">
+                <span class="pf pf-bitcoin-sign"></span> Pay with Bitcoin
+              </a>
+            </h4>
+          </div>
+          <div id="collapseBitcoin" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBitcoin">
+            <div class="panel-body">
+              <div class="form-group">
+                <div class="col-xs-12">
+                  <button id="bitcoin" class="paymentButton btn btn-default">
+                    Generate Bitcoin receiver information
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bitcoinModal" class="modal fade">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Bitcoin receiver details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>To complete your payment, please send <span id="btcAmount"></span> BTC to the following address: <span id="btcAddress"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16" width="24">
+      <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z">
+      </path>
+    </svg>
+    <a href="https://github.com/thorsten-stripe/sources-demo" target="_blank">View on Github</a>
+  </div>
+</footer>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <!-- Firbase for realtime database -->
+  <script src="https://www.gstatic.com/firebasejs/4.1.1/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      // your firebase credentials
+    };
+    firebase.initializeApp(config);
+  </script>
+  <!-- Axios for promise based AJAX -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <!-- Stripe.js V3 for Elements -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <!-- Stripe Checkout -->
+  <script src="https://checkout.stripe.com/checkout.js"></script>
+  <!-- Local Code -->
+  <script src="javascripts/app.js"></script>
+</body>
+</html>
