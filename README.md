@@ -1,4 +1,5 @@
 # Stripe Sources Demo
+https://stripe-sources-demo.herokuapp.com/
 
 ## Installation & setup guide
 ### Requirements
